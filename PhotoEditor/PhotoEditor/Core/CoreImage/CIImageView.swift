@@ -12,20 +12,26 @@ extension CIImageView {
             case filtered
         }
 
+        enum DisplayMode: Hashable, Sendable {
+            case fill
+            case fit
+        }
+
         var filter: FilterType
         var cropOffset: CGFloat
         var mode: Mode
+        var displayMode: DisplayMode = .fit
 
-        static func original() -> Configuration {
-            .init(filter: .none, cropOffset: 0, mode: .original)
+        static func original(displayMode: DisplayMode = .fit) -> Configuration {
+            .init(filter: .none, cropOffset: 0, mode: .original, displayMode: displayMode)
         }
 
-        static func filtered(filter: FilterType) -> Configuration {
-            .init(filter: filter, cropOffset: 0, mode: .filtered)
+        static func filtered(filter: FilterType, displayMode: DisplayMode = .fit) -> Configuration {
+            .init(filter: filter, cropOffset: 0, mode: .filtered, displayMode: displayMode)
         }
 
-        static func divided(filter: FilterType, offset: CGFloat) -> Configuration {
-            .init(filter: filter, cropOffset: offset, mode: .divided)
+        static func divided(filter: FilterType, offset: CGFloat, displayMode: DisplayMode = .fit) -> Configuration {
+            .init(filter: filter, cropOffset: offset, mode: .divided, displayMode: displayMode)
         }
     }
 }
@@ -211,14 +217,26 @@ private extension CIImageView.Coordinator {
         let filter = configuration.filter
         let mode = configuration.mode
         let cropOffset = configuration.cropOffset
+        let displayMode = configuration.displayMode
 
-        let tr = CGAffineTransform
-            .transform(
-                for: image.extent.integral,
-                aspectFit: CGRect(origin: .zero, size: view.drawableSize)
-            )
+        let transform: CGAffineTransform
 
-        image = image.transformed(by: tr)
+        switch displayMode {
+        case .fill:
+            transform = CGAffineTransform
+                .transform(
+                    for: image.extent.integral,
+                    aspectFill: CGRect(origin: .zero, size: view.drawableSize)
+                )
+        case .fit:
+            transform = CGAffineTransform
+                .transform(
+                    for: image.extent.integral,
+                    aspectFit: CGRect(origin: .zero, size: view.drawableSize)
+                )
+        }
+
+        image = image.transformed(by: transform)
 
         switch mode {
         case .original:

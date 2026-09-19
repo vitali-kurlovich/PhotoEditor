@@ -151,7 +151,7 @@ struct FilterPickerItem: View {
         HStack {
             CIImageView(
                 image: thumbnail,
-                configuration: .filtered(filter: filter)
+                configuration: .filtered(filter: filter, displayMode: .fill)
             )
             .frame(width: 100, height: 88)
 
