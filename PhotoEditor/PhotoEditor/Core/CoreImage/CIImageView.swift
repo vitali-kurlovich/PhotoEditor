@@ -34,69 +34,21 @@ struct CIImageView: Equatable {
     let image: CIImage?
     let configuration: Configuration
 
-    func updateView(_ view: MTKView, context: Context) {
-        defer {
-            #if os(iOS) || os(tvOS)
-                view.setNeedsDisplay()
-            #elseif os(macOS)
-                view.setNeedsDisplay(view.bounds)
-            #endif
-        }
-
+    func updateView(_: MTKView, context: Context) {
         let coordinator = context.coordinator
-
-        guard var image else {
-            coordinator.image = nil
-            return
-        }
-
-        let filter = configuration.filter
-        let mode = configuration.mode
-        let cropOffset = configuration.cropOffset
-
-        let tr = CGAffineTransform
-            .transform(
-                for: image.extent.integral,
-                aspectFit: CGRect(origin: .zero, size: view.drawableSize)
-            )
-
-        image = image.transformed(by: tr)
-
-        switch mode {
-        case .original:
-            coordinator.image = image
-
-        case .filtered:
-            coordinator.image = filter.apply(to: image)
-
-        case .divided:
-            #if os(iOS) || os(tvOS)
-                let scale = view.layer.contentsScale
-            #elseif os(macOS)
-                let scale = view.layer?.contentsScale ?? 1
-            #endif
-
-            let offset = cropOffset * scale
-
-            let rect = image.extent
-
-            let vertical = CGVerticalLine(x: offset)
-
-            let (originalRect, filteredRect) = rect.divide(by: vertical)
-
-            let compose = CIFilter.sourceOverCompositing()
-            compose.inputImage = image.cropped(to: originalRect)
-            compose.backgroundImage = filter.apply(to: image.cropped(to: filteredRect))
-
-            coordinator.image = compose.outputImage
-        }
+        coordinator.image = image
+        coordinator.configuration = configuration
     }
 }
 
 #if os(iOS) || os(tvOS)
     extension CIImageView: UIViewRepresentable {
         func makeUIView(context: Context) -> MTKView {
+            let coordinator = context.coordinator
+
             let view = MTKView(frame: .zero, device: context.coordinator.device)
+            coordinator.view = view
+            coordinator.image = image
 
             view.delegate = context.coordinator
             view.framebufferOnly = false
@@ -148,17 +100,8 @@ extension CIImageView {
 }
 
 extension CIImageView {
-    final class Coordinator: NSObject, MTKViewDelegate {
-        let device: MTLDevice
-        let context: CIContext
-        var image: CIImage?
-
-        private let colorSpace = CGColorSpaceCreateDeviceRGB()
-
-        private let commandQueue: MTLCommandQueue
-
+    final class Coordinator: NSObject {
         override init() {
-            //  self.cameraManager = cameraManager
             guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
                 fatalError("Metal is not supported on this device.")
             }
@@ -168,64 +111,135 @@ extension CIImageView {
             super.init()
         }
 
-        func mtkView(_ view: MTKView, drawableSizeWillChange _: CGSize) {
-            #if os(iOS) || os(tvOS)
-                view.setNeedsDisplay()
-            #elseif os(macOS)
-                view.setNeedsDisplay(view.bounds)
-            #endif
+        let device: MTLDevice
+        let context: CIContext
+
+        private let colorSpace = CGColorSpaceCreateDeviceRGB()
+        private let commandQueue: MTLCommandQueue
+
+        var view: MTKView!
+        var configuration: CIImageView.Configuration = .original() {
+            didSet {
+                setNeedsUpdate()
+            }
         }
 
-        func draw(in view: MTKView) {
-            guard
-                let drawable = view.currentDrawable,
-                let commandBuffer = commandQueue.makeCommandBuffer()
-            else { return }
+        var image: CIImage? {
+            didSet {
+                setNeedsUpdate()
+            }
+        }
+    }
+}
 
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
-                descriptor: {
-                    let descriptor = MTLRenderPassDescriptor()
+extension CIImageView.Coordinator: MTKViewDelegate {
+    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
+        setNeedsUpdate()
+    }
 
-                    let color = descriptor.colorAttachments[0]!
-                    color.texture = drawable.texture
-                    color.loadAction = .clear
-                    color.storeAction = .store
-                    color.clearColor = MTLClearColorMake(0, 0, 0, 0)
+    func draw(in view: MTKView) {
+        guard
+            let drawable = view.currentDrawable,
+            let commandBuffer = commandQueue.makeCommandBuffer()
+        else { return }
 
-                    return descriptor
-                }()
+        let renderEncoder = commandBuffer.makeRenderCommandEncoder(
+            descriptor: {
+                let descriptor = MTLRenderPassDescriptor()
+
+                let color = descriptor.colorAttachments[0]!
+                color.texture = drawable.texture
+                color.loadAction = .clear
+                color.storeAction = .store
+                color.clearColor = MTLClearColorMake(0, 0, 0, 0)
+
+                return descriptor
+            }()
+        )
+
+        renderEncoder?.endEncoding()
+
+        if let image = processedImage,
+           image.extent.width > 0, image.extent.height > 0
+        {
+            let scale = self.scale
+
+            let bounds = CGRect(
+                x: view.bounds.x * scale,
+                y: view.bounds.y * scale,
+                width: view.bounds.width * scale,
+                height: view.bounds.height * scale
             )
 
-            renderEncoder?.endEncoding()
-
-            if let image,
-               image.extent.width > 0, image.extent.height > 0
-            {
-                #if os(iOS) || os(tvOS)
-                    let scale = view.layer.contentsScale
-                #elseif os(macOS)
-                    let scale = view.layer?.contentsScale ?? 1
-                #endif
-
-                let bounds = CGRect(
-                    x: view.bounds.x * scale,
-                    y: view.bounds.y * scale,
-                    width: view.bounds.width * scale,
-                    height: view.bounds.height * scale
+            context
+                .render(
+                    image,
+                    to: drawable.texture,
+                    commandBuffer: commandBuffer,
+                    bounds: bounds,
+                    colorSpace: colorSpace
                 )
+        }
 
-                context
-                    .render(
-                        image,
-                        to: drawable.texture,
-                        commandBuffer: commandBuffer,
-                        bounds: bounds,
-                        colorSpace: colorSpace
-                    )
-            }
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+    }
+}
 
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
+private extension CIImageView.Coordinator {
+    var scale: CGFloat {
+        #if os(iOS) || os(tvOS)
+            return view.layer.contentsScale
+        #elseif os(macOS)
+            return view.layer?.contentsScale ?? 1
+        #endif
+    }
+
+    func setNeedsUpdate() {
+        #if os(iOS) || os(tvOS)
+            view.setNeedsDisplay()
+        #elseif os(macOS)
+            view.setNeedsDisplay(view.bounds)
+        #endif
+    }
+
+    var processedImage: CIImage? {
+        guard var image else {
+            return nil
+        }
+
+        let filter = configuration.filter
+        let mode = configuration.mode
+        let cropOffset = configuration.cropOffset
+
+        let tr = CGAffineTransform
+            .transform(
+                for: image.extent.integral,
+                aspectFit: CGRect(origin: .zero, size: view.drawableSize)
+            )
+
+        image = image.transformed(by: tr)
+
+        switch mode {
+        case .original:
+            return image
+
+        case .filtered:
+            return filter.apply(to: image)
+
+        case .divided:
+            let scale = self.scale
+
+            let offset = cropOffset * scale
+            let rect = image.extent
+            let vertical = CGVerticalLine(x: offset)
+            let (originalRect, filteredRect) = rect.divide(by: vertical)
+
+            let compose = CIFilter.sourceOverCompositing()
+            compose.inputImage = image.cropped(to: originalRect)
+            compose.backgroundImage = filter.apply(to: image.cropped(to: filteredRect))
+
+            return compose.outputImage
         }
     }
 }

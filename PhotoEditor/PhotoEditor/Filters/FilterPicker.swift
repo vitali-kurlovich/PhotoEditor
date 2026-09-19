@@ -154,7 +154,6 @@ struct FilterPickerItem: View {
                 configuration: .filtered(filter: filter)
             )
             .frame(width: 100, height: 88)
-            .border(.red)
 
             Text(filterInfo.displayName(for: filter))
             Spacer()
