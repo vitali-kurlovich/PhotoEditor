@@ -1,7 +1,4 @@
 //
-//  FilterTypeInfo.swift
-//  CameraFilters
-//
 //  Created by Kurlovich Vitali on 9/18/26.
 //
 
@@ -39,37 +36,6 @@ struct FilterTypeInfo {
                 return title
             }
             return "LUT"
-        }
-    }
-
-    func displayImage(for filter: FilterType) -> Image {
-        switch filter {
-        case .none:
-            return Image(systemName: "photo")
-        case .sepia:
-            return Image(systemName: "circle.bottomrighthalf.pattern.checkered")
-        case .mono:
-            return Image(systemName: "lightspectrum.horizontal")
-        case .noir:
-            return Image(systemName: "circle.lefthalf.filled.righthalf.striped.horizontal")
-        case .chrome:
-            return Image(systemName: "circle.dotted.and.circle")
-        case .instant:
-            return Image(systemName: "photo")
-        case .fade:
-            return Image(systemName: "photo")
-        case .process:
-            return Image(systemName: "photo")
-        case .transfer:
-            return Image(systemName: "photo")
-        case .comic:
-            return Image(systemName: "photo")
-        case .invert:
-            return Image(systemName: "photo")
-        case .vibrance:
-            return Image(systemName: "photo")
-        case .lut:
-            return Image(systemName: "photo")
         }
     }
 }

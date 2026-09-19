@@ -154,6 +154,8 @@ struct FilterPickerItem: View {
                 configuration: .filtered(filter: filter, displayMode: .fill)
             )
             .frame(width: 100, height: 88)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(radius: 12)
 
             Text(filterInfo.displayName(for: filter))
             Spacer()

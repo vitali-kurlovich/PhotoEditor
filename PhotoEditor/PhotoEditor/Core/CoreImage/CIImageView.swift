@@ -4,7 +4,7 @@ import CoreImage.CIFilterBuiltins
 import MetalKit
 import SwiftUI
 
-extension CIImageView {
+extension CIImageView: Equatable {
     struct Configuration: Hashable, Sendable {
         enum Mode: Hashable, Sendable {
             case original
@@ -36,7 +36,7 @@ extension CIImageView {
     }
 }
 
-struct CIImageView: Equatable {
+struct CIImageView {
     let image: CIImage?
     let configuration: Configuration
 
@@ -112,11 +112,13 @@ extension CIImageView {
 extension CIImageView {
     final class Coordinator: NSObject {
         override init() {
-            guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
+            let metalContext: CIMetalContext = MetalContextManager.shared.context
+
+            guard let queue = metalContext.device.makeCommandQueue() else {
                 fatalError("Metal is not supported on this device.")
             }
-            self.device = device
-            context = CIContext(mtlDevice: device)
+            device = metalContext.device
+            context = metalContext.context
             commandQueue = queue
             super.init()
         }
