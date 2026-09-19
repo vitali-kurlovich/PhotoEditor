@@ -1,0 +1,205 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.46673,0.69781,1.00000,1.00000",
+      "srgb:0.00000,0.20961,0.78861,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "extended-gray:1.00000,1.00000",
+              "display-p3:0.46982,0.47709,0.26617,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5000000000000001,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5000000000000001,
+                "y" : 0.20957374258536512
+              }
+            }
+          },
+          "glass" : true,
+          "image-name" : "big-mountain.svg",
+          "name" : "big-mountain",
+          "position" : {
+            "scale" : 2.52,
+            "translation-in-points" : [
+              251,
+              526
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "extended-gray:1.00000,1.00000",
+              "display-p3:0.38824,0.21569,0.08235,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : -0.15060080268685128
+              },
+              "stop" : {
+                "x" : 0.5000000000000001,
+                "y" : 0.2768340361999748
+              }
+            }
+          },
+          "image-name" : "small-mountain.svg",
+          "name" : "small-mountain",
+          "position" : {
+            "scale" : 2.19,
+            "translation-in-points" : [
+              -272,
+              449
+            ]
+          }
+        }
+      ],
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    },
+    {
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "extended-gray:1.00000,1.00000"
+              }
+            }
+          ],
+          "hidden-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name-specializations" : [
+            {
+              "value" : "cloud.svg"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "star.svg"
+            }
+          ],
+          "name" : "star",
+          "position-specializations" : [
+            {
+              "value" : {
+                "scale" : 2.39,
+                "translation-in-points" : [
+                  315,
+                  -327.09897038664
+                ]
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "scale" : 1.41,
+                "translation-in-points" : [
+                  283.36879683309667,
+                  -353
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "hidden-specializations" : [
+            {
+              "value" : false
+            },
+            {
+              "appearance" : "dark",
+              "value" : true
+            }
+          ],
+          "image-name-specializations" : [
+            {
+              "value" : "cloud.svg"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "cloud.svg"
+            }
+          ],
+          "name" : "cloud",
+          "position" : {
+            "scale" : 2.13,
+            "translation-in-points" : [
+              -426.3900528989278,
+              -92
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "extended-srgb:1.00000,0.80000,0.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "srgb:1.00000,0.99935,0.99027,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
+          "hidden" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "Sun.svg"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "moon.svg"
+            }
+          ],
+          "name" : "moon",
+          "position" : {
+            "scale" : 2.09,
+            "translation-in-points" : [
+              -113,
+              -260
+            ]
+          }
+        }
+      ],
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "iOS"
+    ]
+  }
+}

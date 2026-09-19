@@ -19,8 +19,6 @@ struct PhotoView: View {
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var viewMode: ViewMode = .divided
-    
-    
 
     typealias ViewMode = CIImageView.Configuration.Mode
 
@@ -110,7 +108,7 @@ struct PhotoView: View {
 
                     Label("Filtered", systemImage: "camera.filters")
                         .tag(ViewMode.filtered)
-                } .pickerStyle(.segmented)
+                }.pickerStyle(.segmented)
             }
 
             ToolbarItem(placement: .automatic) {
