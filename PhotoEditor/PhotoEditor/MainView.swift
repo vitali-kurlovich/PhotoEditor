@@ -6,18 +6,8 @@ import SwiftUI
 
 struct MainView: View {
     var body: some View {
-        TabView {
-            Tab("Photo", systemImage: "photo") {
-                NavigationStack {
-                    PhotoView()
-                }
-            }
-
-            Tab("Camera", systemImage: "camera") {
-                NavigationStack {
-                    CameraView()
-                }
-            }
+        NavigationStack {
+            PhotoView()
         }
     }
 }

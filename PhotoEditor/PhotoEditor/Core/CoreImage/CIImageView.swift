@@ -79,10 +79,14 @@ struct CIImageView: Equatable {
     /// SwiftUI wrapper around an MTKView, backed by our Metal `Renderer`.
     extension CIImageView: NSViewRepresentable {
         func makeNSView(context: Context) -> MTKView {
-            let view = MTKView()
+            let coordinator = context.coordinator
 
-            view.device = context.coordinator.device
-            view.delegate = context.coordinator
+            let view = MTKView(frame: .zero, device: coordinator.device)
+
+            coordinator.view = view
+            coordinator.image = image
+
+            view.delegate = coordinator
             view.framebufferOnly = false
             view.isPaused = false
             view.enableSetNeedsDisplay = true

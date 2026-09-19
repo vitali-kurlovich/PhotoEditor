@@ -2,9 +2,7 @@
 //  Created by Kurlovich Vitali on 9/18/26.
 //
 
-import CGMathKit
 import CoreImage
-import ImageIO
 import PhotosUI
 import SwiftUI
 
@@ -12,44 +10,18 @@ struct PhotoView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImage: CIImage? = nil
 
-    @State private var filter: FilterType = .comic
-    @State private var cropBaseline: CGFloat = 0.5
+    @State private var filter: FilterType = .sepia
 
-    @State private var cropOffset: CGFloat = 0
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var viewMode: ViewMode = .divided
 
     typealias ViewMode = CIImageView.Configuration.Mode
 
-    func configuration(offset: CGFloat) -> CIImageView.Configuration {
-        switch viewMode {
-        case .original:
-            return .original()
-        case .filtered:
-            return .filtered(filter: filter)
-        case .divided:
-            return .divided(filter: filter, offset: offset)
-        }
-    }
-
     var body: some View {
         ZStack {
-            GeometryReader { proxy in
-                let frame = proxy.frame(in: .local)
-                let offset = frame.minX + frame.width * cropBaseline
-
-                CIImageView(
-                    image: selectedImage,
-                    configuration: self.configuration(offset: offset)
-                )
-            }
-            .overlay {
-                if viewMode == .divided, filter != .none {
-                    SplitControl(midPoint: $cropBaseline)
-                }
-            }
-            .ignoresSafeArea()
+            ImageEditorView(filter: filter, editedImage: selectedImage, viewMode: viewMode)
+                .ignoresSafeArea()
 
             #if os(iOS) || os(tvOS)
                 .sheet(isPresented: $showFilterPicker) {
@@ -98,7 +70,7 @@ struct PhotoView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .status) {
+            ToolbarItem(placement: .navigation) {
                 Picker("Mode", selection: $viewMode) {
                     Label("Original", systemImage: "camera.metering.spot")
                         .tag(ViewMode.original)
@@ -111,16 +83,14 @@ struct PhotoView: View {
                 }.pickerStyle(.segmented)
             }
 
-            ToolbarItem(placement: .automatic) {
+            ToolbarItemGroup(placement: .automatic) {
                 PhotosPicker(
                     selection: $selectedItem,
                     matching: .images
                 ) {
                     Label("Choose Photo", systemImage: "photo")
                 }
-            }
 
-            ToolbarItem {
                 Button("Filters", systemImage: "camera.filters") {
                     showFilterPicker.toggle()
                 }.disabled(selectedItem == nil)
