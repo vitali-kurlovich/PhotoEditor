@@ -67,12 +67,12 @@ struct PhotoView: View {
                 .onChange(of: selectedItem) { _, newItem in
                     guard let newItem else { return }
 
-                    print(newItem)
-
                     Task {
                         state = .loading
                         do {
                             selectedImage = try await PhotoLibraryManager.shared.load(newItem)
+
+                            MetalContextManager.shared.clearCaches()
 
                         } catch {
                             print(error)
@@ -88,24 +88,12 @@ struct PhotoView: View {
         }
         .toolbar {
             ToolbarItem(placement: modePlacement) {
-                Picker("Mode", selection: $viewMode) {
-                    Label("Original", systemImage: "camera.metering.spot")
-                        .tag(ViewMode.original)
-
-                    Label("Split", systemImage: "rectangle.split.2x1")
-                        .tag(ViewMode.divided)
-
-                    Label("Filtered", systemImage: "camera.filters")
-                        .tag(ViewMode.filtered)
-                }.pickerStyle(.segmented)
+                PhotoEditorViewModePicker(viewMode: $viewMode)
             }
 
             ToolbarItemGroup(placement: .automatic) {
-                PhotosPicker(
-                    selection: $selectedItem,
-                    matching: .images
-                ) {
-                    Label("Choose Photo", systemImage: "photo")
+                Button("Choose Photo", systemImage: "photo") {
+                    showPhotosPicker.toggle()
                 }
 
                 Button("Filters", systemImage: "camera.filters") {

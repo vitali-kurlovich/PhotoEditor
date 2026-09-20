@@ -24,3 +24,17 @@ final class MetalContextManager {
         context = CIMetalContext(device: device)
     }
 }
+
+extension MetalContextManager {
+    var device: MTLDevice {
+        context.device
+    }
+
+    var ciContext: CIContext {
+        context.context
+    }
+
+    func clearCaches() {
+        ciContext.clearCaches()
+    }
+}
