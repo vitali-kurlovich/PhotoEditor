@@ -67,10 +67,13 @@ struct PhotoView: View {
                 .onChange(of: selectedItem) { _, newItem in
                     guard let newItem else { return }
 
+                    print(newItem)
+
                     Task {
                         state = .loading
                         do {
-                            selectedImage = try await newItem.loadTransferable(type: CIImage.self)
+                            selectedImage = try await PhotoLibraryManager.shared.load(newItem)
+
                         } catch {
                             print(error)
                         }
