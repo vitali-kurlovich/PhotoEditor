@@ -38,6 +38,7 @@ extension CIImageView: Equatable {
 
 struct CIImageView {
     let image: CIImage?
+
     let configuration: Configuration
 
     func updateView(_: MTKView, context: Context) {
@@ -126,7 +127,6 @@ extension CIImageView {
         let device: MTLDevice
         let context: CIContext
 
-        private let colorSpace = CGColorSpaceCreateDeviceRGB()
         private let commandQueue: MTLCommandQueue
 
         var view: MTKView!
@@ -171,7 +171,7 @@ extension CIImageView.Coordinator: MTKViewDelegate {
 
         renderEncoder?.endEncoding()
 
-        if let image = processedImage,
+        if let colorSpace = image?.colorSpace, let image = processedImage,
            image.extent.width > 0, image.extent.height > 0
         {
             let scale = self.scale

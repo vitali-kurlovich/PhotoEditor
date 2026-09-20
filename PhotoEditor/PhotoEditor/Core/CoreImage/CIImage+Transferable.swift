@@ -60,7 +60,9 @@ extension CIImage: @retroactive Transferable {
 
             #endif
 
-            return CIImage(cgImage: cgImage).transformed(by: transform)
+            return CIImage(
+                cgImage: cgImage
+            ).transformed(by: transform)
         }
     }
 }
