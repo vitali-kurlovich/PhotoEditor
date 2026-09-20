@@ -158,6 +158,7 @@ struct FilterPickerItem: View {
             .shadow(radius: 12)
 
             Text(filterInfo.displayName(for: filter))
+
             Spacer()
         }
     }

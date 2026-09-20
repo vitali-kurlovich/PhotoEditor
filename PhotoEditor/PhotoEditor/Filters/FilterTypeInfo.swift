@@ -2,40 +2,58 @@
 //  Created by Kurlovich Vitali on 9/18/26.
 //
 
+import CoreImage
 import SwiftUI
+
+extension CIFilter {
+    var displayName: String {
+        attributes[kCIAttributeDisplayName] as? String ?? attributes[kCIAttributeFilterDisplayName] as? String ?? ""
+    }
+
+    var attributeDescription: String? {
+        attributes[kCIAttributeDescription] as? String
+    }
+}
+
+extension FilterTypeInfo {
+    func coreImageFilter(for type: FilterType) -> CIFilter? {
+        switch type {
+        case .none:
+            return nil
+        case .sepia:
+            return CIFilter.sepiaTone()
+        case .mono:
+            return CIFilter.photoEffectMono()
+        case .noir:
+            return CIFilter.photoEffectNoir()
+        case .chrome:
+            return CIFilter.photoEffectChrome()
+        case .instant:
+            return CIFilter.photoEffectInstant()
+        case .fade:
+            return CIFilter.photoEffectFade()
+        case .process:
+            return CIFilter.photoEffectProcess()
+        case .transfer:
+            return CIFilter.photoEffectTransfer()
+        case .comic:
+            return CIFilter.comicEffect()
+        case .invert:
+            return CIFilter.colorInvert()
+        case .vibrance:
+            return CIFilter.vibrance()
+        case .lut:
+            return CIFilter.colorCube()
+        }
+    }
+}
 
 struct FilterTypeInfo {
     func displayName(for filter: FilterType) -> String {
-        switch filter {
-        case .none:
-            return "Original"
-        case .sepia:
-            return "Sepia"
-        case .mono:
-            return "Mono"
-        case .noir:
-            return "Noir"
-        case .chrome:
-            return "Chrome"
-        case .instant:
-            return "Instant"
-        case .fade:
-            return "Fade"
-        case .process:
-            return "Process"
-        case .transfer:
-            return "Transfer"
-        case .comic:
-            return "Comic"
-        case .invert:
-            return "Invert"
-        case .vibrance:
-            return "Vibrance"
-        case let .lut(cube):
-            if let title = cube.title, title.isEmpty == false {
-                return title
-            }
-            return "LUT"
-        }
+        coreImageFilter(for: filter)?.displayName ?? "Original"
+    }
+
+    func attributeDescription(for filter: FilterType) -> String? {
+        coreImageFilter(for: filter)?.attributeDescription
     }
 }

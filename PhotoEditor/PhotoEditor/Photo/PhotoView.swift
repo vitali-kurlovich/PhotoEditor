@@ -67,12 +67,12 @@ struct PhotoView: View {
                 .onChange(of: selectedItem) { _, newItem in
                     guard let newItem else { return }
 
+                    MetalContextManager.shared.clearCaches()
+
                     Task {
                         state = .loading
                         do {
                             selectedImage = try await PhotoLibraryManager.shared.load(newItem)
-
-                            MetalContextManager.shared.clearCaches()
 
                         } catch {
                             print(error)
