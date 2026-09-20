@@ -87,6 +87,25 @@ struct PhotoView: View {
             }
         }
         .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button("Save Photo", systemImage: "square.and.arrow.up") {
+                    guard let selectedImage else { return }
+
+                    Task {
+                        state = .loading
+                        do {
+                            let image = filter.apply(to: selectedImage)
+
+                            try await PhotoLibraryManager.shared.save(image: image)
+                        } catch {
+                            print(error)
+                        }
+
+                        state = .ready
+                    }
+                }.disabled(selectedImage == nil || state != .ready)
+            }
+
             ToolbarItem(placement: modePlacement) {
                 PhotoEditorViewModePicker(viewMode: $viewMode)
             }
@@ -94,11 +113,11 @@ struct PhotoView: View {
             ToolbarItemGroup(placement: .automatic) {
                 Button("Choose Photo", systemImage: "photo") {
                     showPhotosPicker.toggle()
-                }
+                }.disabled(selectedItem == nil || state != .ready)
 
                 Button("Filters", systemImage: "camera.filters") {
                     showFilterPicker.toggle()
-                }.disabled(selectedItem == nil)
+                }.disabled(selectedItem == nil || state != .ready)
             }
         }
         .photosPicker(

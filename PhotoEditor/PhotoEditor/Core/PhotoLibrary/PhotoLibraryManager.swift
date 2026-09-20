@@ -10,6 +10,7 @@ import SwiftUI
 enum PhotoLibraryError: LocalizedError {
     case permissionDenied
     case saveFailed(Error)
+    case pngRepresentationFailed
     case importFailed
 
     var errorDescription: String? {
@@ -20,6 +21,8 @@ enum PhotoLibraryError: LocalizedError {
             return "Couldn't save the photo: \(error.localizedDescription)"
         case .importFailed:
             return "Couldn't load the photo"
+        case .pngRepresentationFailed:
+            return "Couldn't make png representation"
         }
     }
 }
@@ -39,9 +42,24 @@ actor PhotoLibraryManager {
         }
 
         do {
-            try await PHPhotoLibrary.shared().performChanges {
-                _ = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            let context = await MetalContextManager.shared.ciContext
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+
+            let data = context.pngRepresentation(
+                of: image,
+                format: .RGBA8,
+                colorSpace: colorSpace
+            )
+
+            guard let data else {
+                throw PhotoLibraryError.pngRepresentationFailed
             }
+
+            try await PHPhotoLibrary.shared().performChanges {
+                let request = PHAssetCreationRequest.forAsset()
+                request.addResource(with: .photo, data: data, options: nil)
+            }
+
         } catch {
             throw PhotoLibraryError.saveFailed(error)
         }
