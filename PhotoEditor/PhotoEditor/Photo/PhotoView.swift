@@ -7,6 +7,12 @@ import PhotosUI
 import SwiftUI
 
 struct PhotoView: View {
+    enum State: Hashable {
+        case idle
+        case loading
+        case ready
+    }
+
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImage: CIImage? = nil
 
@@ -16,12 +22,24 @@ struct PhotoView: View {
     @State private var showPhotosPicker: Bool = false
     @State private var viewMode: ViewMode = .divided
 
+    @State private var state: State = .idle
+
     typealias ViewMode = CIImageView.Configuration.Mode
 
     var body: some View {
         ZStack {
             ImageEditorView(filter: filter, editedImage: selectedImage, viewMode: viewMode)
                 .ignoresSafeArea()
+                .overlay(alignment: .center) {
+                    switch state {
+                    case .idle:
+                        EmptyView()
+                    case .loading:
+                        ProgressView()
+                    case .ready:
+                        EmptyView()
+                    }
+                }
 
             #if os(iOS) || os(tvOS)
                 .sheet(isPresented: $showFilterPicker) {
@@ -50,17 +68,13 @@ struct PhotoView: View {
                     guard let newItem else { return }
 
                     Task {
+                        state = .loading
                         do {
-                            if let data = try await newItem.loadTransferable(
-                                type: Data.self
-                            ) {
-                                let image = CIImage.image(from: data)
-                                selectedImage = image
-                            }
-
+                            selectedImage = try await newItem.loadTransferable(type: CIImage.self)
                         } catch {
-                            print("Unable to load image:", error)
+                            print(error)
                         }
+                        state = .ready
                     }
                 }
         }
@@ -70,7 +84,7 @@ struct PhotoView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .navigation) {
+            ToolbarItem(placement: modePlacement) {
                 Picker("Mode", selection: $viewMode) {
                     Label("Original", systemImage: "camera.metering.spot")
                         .tag(ViewMode.original)
@@ -102,6 +116,14 @@ struct PhotoView: View {
             matching: .images
         )
         .ignoresSafeArea()
+    }
+
+    var modePlacement: ToolbarItemPlacement {
+        #if os(iOS) || os(tvOS)
+            .bottomBar
+        #elseif os(macOS)
+            .automatic
+        #endif
     }
 }
 
