@@ -12,6 +12,7 @@ struct MCPToolView: View {
 
     @State private var argumentsJSON: String = "{}"
     @State private var result: MCPToolResult?
+    @State private var images: [CIImage] = []
     @State private var errorMessage: String?
     @State private var isRunning: Bool = false
 
@@ -66,7 +67,7 @@ struct MCPToolView: View {
                             .textSelection(.enabled)
                     }
 
-                    ForEach(Array(result.images.enumerated()), id: \.offset) { _, image in
+                    ForEach(Array(images.enumerated()), id: \.offset) { _, image in
                         Button {
                             onImage(image)
                         } label: {
@@ -86,15 +87,31 @@ struct MCPToolView: View {
         isRunning = true
         errorMessage = nil
         result = nil
+        images = []
 
         Task {
             do {
-                result = try await MCPClientManager.shared.callTool(tool.name, argumentsJSON: argumentsJSON)
+                let result = try await MCPClientManager.shared.callTool(tool.name, argumentsJSON: argumentsJSON)
+                self.result = result
+                images = result.images
+                images += await loadLinkedImages(result.imageURLs)
             } catch {
                 errorMessage = error.localizedDescription
             }
             isRunning = false
         }
+    }
+
+    private func loadLinkedImages(_ urls: [URL]) async -> [CIImage] {
+        var loaded: [CIImage] = []
+        for url in urls {
+            do {
+                loaded.append(try await MCPClientManager.shared.loadImage(from: url))
+            } catch {
+                errorMessage = "Couldn't load \(url.lastPathComponent): \(error.localizedDescription)"
+            }
+        }
+        return loaded
     }
 
     private static func prettyJSON(_ value: Value) -> String {

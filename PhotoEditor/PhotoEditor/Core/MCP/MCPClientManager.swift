@@ -163,14 +163,62 @@ struct MCPToolResult {
         }.joined(separator: "\n")
     }
 
-    /// Images returned by the tool, decoded from base64.
+    /// Images embedded in the result, decoded from base64.
     var images: [CIImage] {
         content.compactMap { item in
-            guard case let .image(base64, _, _, _) = item,
-                  let data = Data(base64Encoded: base64)
-            else { return nil }
+            let base64: String?
+            switch item {
+            case let .image(data, _, _, _):
+                base64 = data
+            case let .resource(resource, _, _) where resource.mimeType?.hasPrefix("image/") == true:
+                base64 = resource.blob
+            default:
+                base64 = nil
+            }
 
+            guard let base64, let data = Data(base64Encoded: base64) else { return nil }
             return CIImage(data: data)
         }
+    }
+
+    /// Links to images in the result, e.g. Gradio file URLs from Hugging Face Spaces.
+    var imageURLs: [URL] {
+        content.flatMap { item -> [URL] in
+            switch item {
+            case let .resourceLink(uri, _, _, _, mimeType, _):
+                guard let url = URL(string: uri) else { return [] }
+                let isImage = mimeType.map { $0.hasPrefix("image/") } ?? Self.hasImageExtension(url)
+                return isImage ? [url] : []
+            case let .text(text, _, _):
+                return Self.links(in: text).filter(Self.hasImageExtension)
+            default:
+                return []
+            }
+        }
+    }
+
+    private static let imageExtensions: Set<String> = ["png", "jpg", "jpeg", "webp", "heic", "gif", "tif", "tiff"]
+
+    private static func hasImageExtension(_ url: URL) -> Bool {
+        imageExtensions.contains(url.pathExtension.lowercased())
+    }
+
+    private static func links(in text: String) -> [URL] {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return [] }
+
+        let range = NSRange(text.startIndex..., in: text)
+        return detector.matches(in: text, range: range).compactMap(\.url)
+    }
+}
+
+extension MCPClientManager {
+    /// Downloads an image a tool returned as a link.
+    func loadImage(from url: URL) async throws -> CIImage {
+        let (data, _) = try await URLSession.shared.data(from: url)
+
+        guard let image = CIImage(data: data) else {
+            throw URLError(.cannotDecodeContentData)
+        }
+        return image
     }
 }
