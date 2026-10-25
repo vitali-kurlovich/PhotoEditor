@@ -163,36 +163,43 @@ struct MCPToolResult {
         }.joined(separator: "\n")
     }
 
-    /// Images embedded in the result, decoded from base64.
-    var images: [CIImage] {
-        content.compactMap { item in
-            let base64: String?
-            switch item {
-            case let .image(data, _, _, _):
-                base64 = data
-            case let .resource(resource, _, _) where resource.mimeType?.hasPrefix("image/") == true:
-                base64 = resource.blob
-            default:
-                base64 = nil
-            }
-
-            guard let base64, let data = Data(base64Encoded: base64) else { return nil }
-            return CIImage(data: data)
-        }
+    /// A displayable piece of the result, in the order the tool returned it.
+    enum Item {
+        case text(String)
+        /// Image data embedded in the result.
+        case imageData(Data)
+        /// Link to an image, e.g. a Gradio file URL from a Hugging Face Space.
+        case imageURL(URL)
+        case link(name: String, url: URL)
+        /// Content the app can't show, such as audio.
+        case note(String)
     }
 
-    /// Links to images in the result, e.g. Gradio file URLs from Hugging Face Spaces.
-    var imageURLs: [URL] {
-        content.flatMap { item -> [URL] in
+    var items: [Item] {
+        content.flatMap { item -> [Item] in
             switch item {
-            case let .resourceLink(uri, _, _, _, mimeType, _):
-                guard let url = URL(string: uri) else { return [] }
-                let isImage = mimeType.map { $0.hasPrefix("image/") } ?? Self.hasImageExtension(url)
-                return isImage ? [url] : []
             case let .text(text, _, _):
-                return Self.links(in: text).filter(Self.hasImageExtension)
-            default:
-                return []
+                return [.text(text)] + Self.links(in: text).filter(Self.hasImageExtension).map(Item.imageURL)
+
+            case let .image(base64, mimeType, _, _):
+                guard let data = Data(base64Encoded: base64) else { return [.note("Unreadable \(mimeType) image")] }
+                return [.imageData(data)]
+
+            case let .audio(_, mimeType, _, _):
+                return [.note("Audio (\(mimeType)) isn't supported")]
+
+            case let .resource(resource, _, _):
+                if resource.mimeType?.hasPrefix("image/") == true,
+                   let blob = resource.blob, let data = Data(base64Encoded: blob)
+                {
+                    return [.imageData(data)]
+                }
+                return [.text(resource.text ?? resource.uri)]
+
+            case let .resourceLink(uri, name, _, _, mimeType, _):
+                guard let url = URL(string: uri) else { return [.text("\(name): \(uri)")] }
+                let isImage = mimeType.map { $0.hasPrefix("image/") } ?? Self.hasImageExtension(url)
+                return isImage ? [.imageURL(url)] : [.link(name: name, url: url)]
             }
         }
     }

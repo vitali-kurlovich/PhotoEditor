@@ -11,23 +11,23 @@ struct MCPToolView: View {
     var onImage: (CIImage) -> Void = { _ in }
 
     @State private var argumentsJSON: String = "{}"
-    @State private var result: MCPToolResult?
-    @State private var images: [CIImage] = []
+    @State private var runs: [MCPToolRun] = []
     @State private var errorMessage: String?
     @State private var isRunning: Bool = false
+    @State private var showSchema: Bool = false
 
     var body: some View {
         Form {
-            if let description = tool.description {
-                Section {
+            Section {
+                if let description = tool.description {
                     Text(description)
                 }
-            }
 
-            Section("Input schema") {
-                Text(Self.prettyJSON(tool.inputSchema))
-                    .font(.caption.monospaced())
-                    .textSelection(.enabled)
+                DisclosureGroup("Input schema", isExpanded: $showSchema) {
+                    Text(Self.prettyJSON(tool.inputSchema))
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                }
             }
 
             Section("Arguments (JSON)") {
@@ -43,7 +43,10 @@ struct MCPToolView: View {
                     run()
                 } label: {
                     if isRunning {
-                        ProgressView()
+                        HStack {
+                            ProgressView()
+                            Text("Running…")
+                        }
                     } else {
                         Text("Call Tool")
                     }
@@ -55,63 +58,49 @@ struct MCPToolView: View {
                 Section("Error") {
                     Text(errorMessage)
                         .foregroundStyle(.red)
+                        .textSelection(.enabled)
                 }
             }
 
-            if let result {
-                Section(result.isError ? "Tool error" : "Result") {
-                    if !result.text.isEmpty {
-                        Text(result.text)
-                            .font(.callout.monospaced())
-                            .foregroundStyle(result.isError ? .red : .primary)
-                            .textSelection(.enabled)
-                    }
-
-                    ForEach(Array(images.enumerated()), id: \.offset) { _, image in
-                        Button {
-                            onImage(image)
-                        } label: {
-                            CIImageThumbnail(image: image)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Open image in editor")
-                    }
+            ForEach(runs) { run in
+                MCPToolRunView(run: run, onImage: onImage) { arguments in
+                    argumentsJSON = arguments
                 }
             }
         }
         .formStyle(.grouped)
         .navigationTitle(tool.title ?? tool.name)
+        .toolbar {
+            if !runs.isEmpty {
+                ToolbarItem(placement: .automatic) {
+                    Button("Clear Results", systemImage: "trash") {
+                        runs = []
+                        errorMessage = nil
+                    }
+                }
+            }
+        }
     }
 
     private func run() {
         isRunning = true
         errorMessage = nil
-        result = nil
-        images = []
+
+        let arguments = argumentsJSON
+        let clock = ContinuousClock()
+        let start = clock.now
+        let date = Date()
 
         Task {
             do {
-                let result = try await MCPClientManager.shared.callTool(tool.name, argumentsJSON: argumentsJSON)
-                self.result = result
-                images = result.images
-                images += await loadLinkedImages(result.imageURLs)
+                let result = try await MCPClientManager.shared.callTool(tool.name, argumentsJSON: arguments)
+                let run = MCPToolRun(result: result, argumentsJSON: arguments, date: date, duration: clock.now - start)
+                runs.insert(run, at: 0)
             } catch {
                 errorMessage = error.localizedDescription
             }
             isRunning = false
         }
-    }
-
-    private func loadLinkedImages(_ urls: [URL]) async -> [CIImage] {
-        var loaded: [CIImage] = []
-        for url in urls {
-            do {
-                loaded.append(try await MCPClientManager.shared.loadImage(from: url))
-            } catch {
-                errorMessage = "Couldn't load \(url.lastPathComponent): \(error.localizedDescription)"
-            }
-        }
-        return loaded
     }
 
     private static func prettyJSON(_ value: Value) -> String {
@@ -120,20 +109,5 @@ struct MCPToolView: View {
 
         guard let data = try? encoder.encode(value) else { return value.description }
         return String(decoding: data, as: UTF8.self)
-    }
-}
-
-private struct CIImageThumbnail: View {
-    let image: CIImage
-
-    var body: some View {
-        if let cgImage = MetalContextManager.shared.ciContext.createCGImage(image, from: image.extent) {
-            Image(decorative: cgImage, scale: 1)
-                .resizable()
-                .scaledToFit()
-                .frame(maxHeight: 240)
-        } else {
-            Label("Unsupported image", systemImage: "photo.badge.exclamationmark")
-        }
     }
 }
