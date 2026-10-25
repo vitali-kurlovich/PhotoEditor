@@ -20,6 +20,7 @@ struct PhotoView: View {
 
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
+    @State private var showMCPServer: Bool = false
     @State private var viewMode: ViewMode = .divided
 
     @State private var state: State = .idle
@@ -118,6 +119,17 @@ struct PhotoView: View {
                 Button("Filters", systemImage: "camera.filters") {
                     showFilterPicker.toggle()
                 }.disabled(selectedItem == nil || state != .ready)
+
+                Button("MCP", systemImage: "point.3.connected.trianglepath.dotted") {
+                    showMCPServer.toggle()
+                }
+            }
+        }
+        .sheet(isPresented: $showMCPServer) {
+            MCPServerView { image in
+                MetalContextManager.shared.clearCaches()
+                selectedImage = image
+                state = .ready
             }
         }
         .photosPicker(

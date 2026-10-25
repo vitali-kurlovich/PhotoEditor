@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		54F66B63305EB5FB00D97B7A /* CGMathKit in Frameworks */ = {isa = PBXBuildFile; productRef = 54F66B62305EB5FB00D97B7A /* CGMathKit */; };
 		54F66B65305EB5FB00D97B7A /* MathKit in Frameworks */ = {isa = PBXBuildFile; productRef = 54F66B64305EB5FB00D97B7A /* MathKit */; };
+		54FB00023061000000A1B2C3 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = 54FB00013061000000A1B2C3 /* MCP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 			files = (
 				54F66B63305EB5FB00D97B7A /* CGMathKit in Frameworks */,
 				54F66B65305EB5FB00D97B7A /* MathKit in Frameworks */,
+				54FB00023061000000A1B2C3 /* MCP in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 			packageProductDependencies = (
 				54F66B62305EB5FB00D97B7A /* CGMathKit */,
 				54F66B64305EB5FB00D97B7A /* MathKit */,
+				54FB00013061000000A1B2C3 /* MCP */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* PhotoEditor.app */;
@@ -101,6 +104,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				54F66B61305EB5FB00D97B7A /* XCRemoteSwiftPackageReference "swift-mathkit" */,
+				54FB00003061000000A1B2C3 /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -273,7 +277,7 @@
 				DEVELOPMENT_TEAM = 5SLX4F29EU;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
@@ -330,7 +334,7 @@
 				DEVELOPMENT_TEAM = 5SLX4F29EU;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
@@ -405,6 +409,14 @@
 				minimumVersion = 0.17.2;
 			};
 		};
+		54FB00003061000000A1B2C3 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.12.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -417,6 +429,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 54F66B61305EB5FB00D97B7A /* XCRemoteSwiftPackageReference "swift-mathkit" */;
 			productName = MathKit;
+		};
+		54FB00013061000000A1B2C3 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54FB00003061000000A1B2C3 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
