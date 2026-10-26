@@ -7,23 +7,31 @@ import MCP
 import SwiftUI
 
 struct MCPServerView: View {
+    private nonisolated static var key: String {
+        "HUGGINGFACE_API_KEY"
+    }
+
     /// Called when the user picks an image returned by a tool.
     var onImage: (CIImage) -> Void = { _ in }
 
-    @AppStorage("mcp.serverURL") private var serverURL: String = "http://localhost:8080/mcp"
-    @State private var bearerToken: String = ""
+    private var serverURL: String = "https://huggingface.co/mcp"
+
+    @State private var bearerToken: String = ProcessInfo.processInfo.environment[Self.key] ?? ""
 
     @Environment(\.dismiss) private var dismiss
 
-    private var manager: MCPClientManager { .shared }
+    private var manager: MCPClientManager {
+        .shared
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Server") {
-                    TextField("Server URL", text: $serverURL)
+                    Text(serverURL)
                         .textContentType(.URL)
                         .autocorrectionDisabled()
+                        .disabled(true)
                     #if os(iOS)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.URL)

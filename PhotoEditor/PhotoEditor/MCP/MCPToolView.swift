@@ -6,6 +6,59 @@ import CoreImage
 import MCP
 import SwiftUI
 
+@Observable
+final class MCPToolRunner {
+    enum Result {
+        case idle
+        case inProgress
+        case run(MCPToolRun)
+        case error(String)
+    }
+
+    var result: Result = .idle
+
+    var tool: Tool?
+
+    init(tool: Tool? = nil) {
+        self.tool = tool
+    }
+
+    func prettyJSON(_ arguments: [String: Value]) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+
+        guard let data = try? encoder.encode(arguments) else { return arguments.description }
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    func run(_ arguments: [String: Value]) async {
+        guard let tool else { return }
+
+        result = .inProgress
+
+        do {
+            let clock = ContinuousClock()
+            let start = clock.now
+            let date = Date()
+
+            let toolResult = try await manager.callTool(
+                tool.name,
+                arguments: arguments
+            )
+
+            let run = MCPToolRun(result: toolResult, argumentsJSON: prettyJSON(arguments), date: date, duration: clock.now - start)
+            result = .run(run)
+
+        } catch {
+            result = .error(error.localizedDescription)
+        }
+    }
+
+    private var manager: MCPClientManager {
+        .shared
+    }
+}
+
 struct MCPToolView: View {
     let tool: Tool
     var onImage: (CIImage) -> Void = { _ in }
@@ -79,7 +132,7 @@ struct MCPToolView: View {
                     }
                 }
             }
-        }
+        }.controlSize(.small)
     }
 
     private func run() {
@@ -109,5 +162,21 @@ struct MCPToolView: View {
 
         guard let data = try? encoder.encode(value) else { return value.description }
         return String(decoding: data, as: UTF8.self)
+    }
+}
+
+struct MCPInputToolView: View {
+    let input: Value
+
+    var body: some View {}
+}
+
+struct MCPInputToolBoolView: View {
+    let name: String
+
+    var value: Bool
+
+    var body: some View {
+        // Toggle(name, isOn: <#T##Binding<Bool>#>)
     }
 }

@@ -3,6 +3,7 @@
 //
 
 import CoreImage
+import MCP
 import SwiftUI
 
 /// One call of a tool and its response.
@@ -54,7 +55,9 @@ final class MCPToolRun: Identifiable {
     /// All text parts of the response.
     var text: String {
         items.compactMap { item in
-            if case let .text(_, text) = item { return text }
+            if case let .text(_, text) = item {
+                return text
+            }
             return nil
         }.joined(separator: "\n")
     }
@@ -331,11 +334,11 @@ private struct MCPImageViewer: View {
                 }
                 .clipped()
                 .background(.black)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
                 }
-            }
         }
     }
 
@@ -344,14 +347,18 @@ private struct MCPImageViewer: View {
             .updating($pinch) { value, state, _ in state = value.magnification }
             .onEnded { value in
                 scale = min(max(scale * value.magnification, 1), 8)
-                if scale == 1 { offset = .zero }
+                if scale == 1 {
+                    offset = .zero
+                }
             }
     }
 
     private var pan: some Gesture {
         DragGesture()
             .updating($drag) { value, state, _ in
-                if scale > 1 { state = value.translation }
+                if scale > 1 {
+                    state = value.translation
+                }
             }
             .onEnded { value in
                 guard scale > 1 else { return }

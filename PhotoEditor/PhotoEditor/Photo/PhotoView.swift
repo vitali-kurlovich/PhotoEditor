@@ -114,11 +114,11 @@ struct PhotoView: View {
             ToolbarItemGroup(placement: .automatic) {
                 Button("Choose Photo", systemImage: "photo") {
                     showPhotosPicker.toggle()
-                }.disabled(selectedItem == nil || state != .ready)
+                }.disabled(state != .ready)
 
                 Button("Filters", systemImage: "camera.filters") {
                     showFilterPicker.toggle()
-                }.disabled(selectedItem == nil || state != .ready)
+                }.disabled(selectedImage == nil || state != .ready)
 
                 Button("MCP", systemImage: "point.3.connected.trianglepath.dotted") {
                     showMCPServer.toggle()
@@ -126,11 +126,13 @@ struct PhotoView: View {
             }
         }
         .sheet(isPresented: $showMCPServer) {
-            MCPServerView { image in
-                MetalContextManager.shared.clearCaches()
-                selectedImage = image
-                state = .ready
-            }
+            HuggingfacePromtView(
+                onImage: { image in
+                    MetalContextManager.shared.clearCaches()
+                    selectedImage = image
+                    state = .ready
+                }
+            )
         }
         .photosPicker(
             isPresented: $showPhotosPicker,

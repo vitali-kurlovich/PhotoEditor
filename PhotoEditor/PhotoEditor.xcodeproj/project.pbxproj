@@ -9,11 +9,13 @@
 /* Begin PBXBuildFile section */
 		54F66B63305EB5FB00D97B7A /* CGMathKit in Frameworks */ = {isa = PBXBuildFile; productRef = 54F66B62305EB5FB00D97B7A /* CGMathKit */; };
 		54F66B65305EB5FB00D97B7A /* MathKit in Frameworks */ = {isa = PBXBuildFile; productRef = 54F66B64305EB5FB00D97B7A /* MathKit */; };
+		54FA16943060A1EC004E863D /* Subscriptions.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 54FA16933060A1EC004E863D /* Subscriptions.storekit */; };
 		54FB00023061000000A1B2C3 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = 54FB00013061000000A1B2C3 /* MCP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* PhotoEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		54FA16933060A1EC004E863D /* Subscriptions.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Subscriptions.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +41,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				54FA16933060A1EC004E863D /* Subscriptions.storekit */,
 				000000000000000000000010 /* PhotoEditor */,
 				000000000000000000000020 /* Products */,
 			);
@@ -120,6 +123,7 @@
 		000000000000000140000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				54FA16943060A1EC004E863D /* Subscriptions.storekit in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
