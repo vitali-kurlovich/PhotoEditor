@@ -46,7 +46,9 @@ final class MCPClientManager {
     private init() {}
 
     var isConnected: Bool {
-        if case .connected = state { return true }
+        if case .connected = state {
+            return true
+        }
         return false
     }
 
@@ -107,17 +109,20 @@ final class MCPClientManager {
         tools = all
     }
 
-    /// Calls a tool with arguments given as a JSON object string.
-    func callTool(_ name: String, argumentsJSON: String) async throws -> MCPToolResult {
+    func callTool(_ name: String, arguments: [String: Value]) async throws -> MCPToolResult {
         guard let client else { throw MCPClientError.notConnected }
 
-        let arguments = try Self.decodeArguments(argumentsJSON)
         let result = try await client.callTool(name: name, arguments: arguments)
-
         return MCPToolResult(content: result.content, isError: result.isError ?? false)
     }
 
-    private static func decodeArguments(_ json: String) throws -> [String: Value]? {
+    /// Calls a tool with arguments given as a JSON object string.
+    func callTool(_ name: String, argumentsJSON: String) async throws -> MCPToolResult {
+        let arguments = try Self.decodeArguments(argumentsJSON) ?? [:]
+        return try await callTool(name, arguments: arguments)
+    }
+
+    static func decodeArguments(_ json: String) throws -> [String: Value]? {
         let trimmed = json.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
