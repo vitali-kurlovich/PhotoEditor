@@ -4,13 +4,15 @@ A SwiftUI photo editor for iOS and macOS built around **cinematic, LUT-based col
 
 ## Demo
 
+### Hugging Face MCP
+
+[![Hugging Face MCP image generation demo](https://img.youtube.com/vi/UkreDKHta_4/0.jpg)](https://youtu.be/UkreDKHta_4)
+
+
 ### LUT color grading
 
 [![LUT color grading demo](https://img.youtube.com/vi/yoC9tpgSfNg/0.jpg)](https://youtu.be/yoC9tpgSfNg)
 
-### Hugging Face MCP
-
-[![Hugging Face MCP image generation demo](https://img.youtube.com/vi/UkreDKHta_4/0.jpg)](https://youtu.be/UkreDKHta_4)
 
 ## Features
 
