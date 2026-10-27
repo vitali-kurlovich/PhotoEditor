@@ -105,15 +105,22 @@ struct VideoGenerator {
     private func makeFrame(t: Double) -> CIImage? {
         let image = inputImage
 
-        let rect = image.extent
-        let offset = rect.width * (1.0 - t)
-        let vertical = CGVerticalLine(x: offset)
-        let (originalRect, filteredRect) = rect.divide(by: vertical)
-
         let compose = CIFilter.sourceOverCompositing()
-        compose.inputImage = image.cropped(to: originalRect)
-        compose.backgroundImage = filter.apply(to: image.cropped(to: filteredRect))
+        compose.inputImage = filter.apply(to: image).withOpacity(.init(t))
+        compose.backgroundImage = image
 
         return compose.outputImage
+    }
+}
+
+extension CIImage {
+    func withOpacity(_ opacity: CGFloat) -> CIImage? {
+        let f = CIFilter.colorMatrix()
+        f.inputImage = self
+        f.rVector = CIVector(x: opacity, y: 0, z: 0, w: 0)
+        f.gVector = CIVector(x: 0, y: opacity, z: 0, w: 0)
+        f.bVector = CIVector(x: 0, y: 0, z: opacity, w: 0)
+        f.aVector = CIVector(x: 0, y: 0, z: 0, w: opacity)
+        return f.outputImage
     }
 }
