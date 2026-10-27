@@ -13,11 +13,11 @@ nonisolated enum LUTBundle {
             "PGS _ Neon City _ 04",
             "PGS _ Neon City _ 05",
 
-            "Film Color Grading LUTs Pack V2#001.cube",
-            "Film Color Grading LUTs Pack V2#002.cube",
-            "Film Color Grading LUTs Pack V2#003.cube",
-            "Film Color Grading LUTs Pack V2#004.cube",
-            "Film Color Grading LUTs Pack V2#005.cube",
+            "Film Color Grading LUTs Pack V2#001",
+            "Film Color Grading LUTs Pack V2#002",
+            "Film Color Grading LUTs Pack V2#003",
+            "Film Color Grading LUTs Pack V2#004",
+            "Film Color Grading LUTs Pack V2#005",
         ]
     }
 
