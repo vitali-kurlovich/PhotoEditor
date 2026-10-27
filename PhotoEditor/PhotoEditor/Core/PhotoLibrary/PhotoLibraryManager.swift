@@ -12,6 +12,7 @@ enum PhotoLibraryError: LocalizedError {
     case saveFailed(Error)
     case pngRepresentationFailed
     case importFailed
+    case fileDoNotExists
 
     var errorDescription: String? {
         switch self {
@@ -23,6 +24,8 @@ enum PhotoLibraryError: LocalizedError {
             return "Couldn't load the photo"
         case .pngRepresentationFailed:
             return "Couldn't make png representation"
+        case .fileDoNotExists:
+            return "File do not exists"
         }
     }
 }
@@ -62,6 +65,24 @@ actor PhotoLibraryManager {
 
         } catch {
             throw PhotoLibraryError.saveFailed(error)
+        }
+    }
+
+    func saveVideoToPhotos(_ url: URL) async throws {
+        guard FileManager.default
+            .fileExists(atPath: url.path)
+        else {
+            throw PhotoLibraryError.fileDoNotExists
+        }
+
+        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        guard status == .authorized || status == .limited else { throw PhotoLibraryError.permissionDenied }
+
+        try await PHPhotoLibrary.shared().performChanges {
+            let request = PHAssetCreationRequest.forAsset()
+            let options = PHAssetResourceCreationOptions()
+            options.shouldMoveFile = false // true moves the file instead of copying it
+            request.addResource(with: .video, fileURL: url, options: options)
         }
     }
 

@@ -7,104 +7,83 @@ import PhotosUI
 import SwiftUI
 
 struct PhotoView: View {
-    enum State: Hashable {
-        case idle
-        case loading
-        case ready
-    }
-
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImage: CIImage? = nil
-
-    @State private var filter: FilterType = .sepia
-
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var showMCPServer: Bool = false
+    @State private var showFileExport: Bool = false
+
     @State private var viewMode: ViewMode = .divided
 
-    @State private var state: State = .idle
+    @State
+    private var model = PhotoViewModel()
 
     typealias ViewMode = CIImageView.Configuration.Mode
 
     var body: some View {
         ZStack {
-            ImageEditorView(filter: filter, editedImage: selectedImage, viewMode: viewMode)
-                .ignoresSafeArea()
-                .overlay(alignment: .center) {
-                    switch state {
-                    case .idle:
-                        EmptyView()
-                    case .loading:
-                        ProgressView()
-                    case .ready:
-                        EmptyView()
-                    }
+            ImageEditorView(
+                filter: model.filter,
+                editedImage: model.selectedImage,
+                viewMode: viewMode
+            )
+            .ignoresSafeArea()
+            .overlay(alignment: .center) {
+                switch model.state {
+                case let .loading(description):
+                    PhotoProgressView(description: description)
+                case .ready:
+                    EmptyView()
                 }
+            }
 
             #if os(iOS) || os(tvOS)
-                .sheet(isPresented: $showFilterPicker) {
-                    FilterPickerLoader(
-                        thumbnail: selectedImage,
-                        selectedFilter: .init(get: {
-                            filter
-                        }, set: { new in
-                            filter = new ?? .none
-                        })
-                    )
-                }
+            .sheet(isPresented: $showFilterPicker) {
+                FilterPickerLoader(
+                    thumbnail: selectedImage,
+                    selectedFilter: .init(get: {
+                        filter
+                    }, set: { new in
+                        filter = new ?? .none
+                    })
+                )
+            }
             #elseif os(macOS)
-                .inspector(isPresented: $showFilterPicker) {
-                    FilterPickerLoader(
-                        thumbnail: selectedImage,
-                        selectedFilter: .init(get: {
-                            filter
-                        }, set: { new in
-                            filter = new ?? .none
-                        })
-                    )
-                }
+            .inspector(isPresented: $showFilterPicker) {
+                FilterPickerLoader(
+                    thumbnail: model.selectedImage,
+                    selectedFilter: .init(get: {
+                        model.filter
+                    }, set: { new in
+                        model.filter = new ?? .none
+                    })
+                )
+            }
             #endif
-                .onChange(of: selectedItem) { _, newItem in
-                    guard let newItem else { return }
-
-                    MetalContextManager.shared.clearCaches()
-
-                    Task {
-                        state = .loading
-                        do {
-                            selectedImage = try await PhotoLibraryManager.shared.load(newItem)
-
-                        } catch {
-                            print(error)
-                        }
-                        state = .ready
-                    }
-                }
         }
         .onAppear {
-            if selectedItem == nil {
+            if model.selectedItem == nil {
                 showPhotosPicker = true
             }
         }
         .toolbar {
-            ToolbarItem(placement: .automatic) {
+            ToolbarItemGroup(placement: .automatic) {
                 Button("Save Photo", systemImage: "square.and.arrow.up") {
-                    guard let selectedImage else { return }
-
                     Task {
-                        state = .loading
                         do {
-                            let image = filter.apply(to: selectedImage)
-
-                            try await PhotoLibraryManager.shared.save(image: image)
-                        } catch {
-                            print(error)
-                        }
-
-                        state = .ready
+                            try await model.saveImageToPhotoLibrary()
+                        } catch {}
                     }
-                }.disabled(selectedImage == nil || state != .ready)
+
+                }.disabled(model.selectedImage == nil || model.state != .ready)
+
+                Button("Generate Video", systemImage: "movieclapper") {
+                    Task {
+                        do {
+                            let url = try await model.generateVideo()
+                        } catch {}
+                    }
+
+                }.disabled(model.selectedImage == nil || model.state != .ready)
             }
 
             ToolbarItem(placement: modePlacement) {
@@ -114,11 +93,11 @@ struct PhotoView: View {
             ToolbarItemGroup(placement: .automatic) {
                 Button("Choose Photo", systemImage: "photo") {
                     showPhotosPicker.toggle()
-                }.disabled(state != .ready)
+                }.disabled(model.state != .ready)
 
                 Button("Filters", systemImage: "camera.filters") {
                     showFilterPicker.toggle()
-                }.disabled(selectedImage == nil || state != .ready)
+                }.disabled(model.selectedImage == nil || model.state != .ready)
 
                 Button("MCP", systemImage: "point.3.connected.trianglepath.dotted") {
                     showMCPServer.toggle()
@@ -129,17 +108,17 @@ struct PhotoView: View {
             HuggingfacePromtView(
                 onImage: { image in
                     MetalContextManager.shared.clearCaches()
-                    selectedImage = image
-                    state = .ready
+                    model.selectedImage = image
                 }
             )
         }
         .photosPicker(
             isPresented: $showPhotosPicker,
-            selection: $selectedItem,
+            selection: $model.selectedItem,
             matching: .images
         )
         .ignoresSafeArea()
+        
     }
 
     var modePlacement: ToolbarItemPlacement {

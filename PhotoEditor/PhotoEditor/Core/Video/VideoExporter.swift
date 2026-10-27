@@ -91,7 +91,7 @@ struct VideoGenerator {
             context.render(image, to: buffer, bounds: extent, colorSpace: colorSpace)
 
             let time = CMTime(value: CMTimeValue(frame), timescale: fps)
-            
+
             if !adaptor.append(buffer, withPresentationTime: time) {
                 throw VideoGeneratorError.assetWriterError("Append failed at frame \(frame): \(writer.error?.localizedDescription ?? "")")
             }
