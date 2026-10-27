@@ -10,7 +10,7 @@ struct PhotoView: View {
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var showMCPServer: Bool = false
-   
+
     @State private var showVideoPreview: Bool = false
 
     @State private var viewMode: ViewMode = .divided

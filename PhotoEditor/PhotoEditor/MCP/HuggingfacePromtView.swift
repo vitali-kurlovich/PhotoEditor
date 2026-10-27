@@ -38,24 +38,27 @@ struct HuggingfacePromtView: View {
     private var width: Double = 1024
     @State
     private var height: Double = 1024
-    
+
     @FocusState private var isPromptFocused: Bool
 
     var body: some View {
         NavigationStack {
             Form {
-                Section{
+                Section {
                     SecureField("Bearer token (optional)", text: $bearerToken)
                 } header: {
                     HStack {
                         Text("Hugging Face")
                         Spacer()
-                        Link("https://huggingface.co", destination: URL(string:"https://huggingface.co/settings/tokens")!)
+                        Link("https://huggingface.co", destination: URL(string: "https://huggingface.co/settings/tokens")!)
                     }
                 }
-                Section {
-                    TextField("Promt", text: $promt)
+                Section("Prompt") {
+                    TextEditor(text: $promt)
+                        .scrollContentBackground(.hidden)
                         .focused($isPromptFocused)
+                }
+                Section {
                     Slider(value: $width, in: 256 ... 2048, step: 256) {
                         HStack {
                             Text("Width")

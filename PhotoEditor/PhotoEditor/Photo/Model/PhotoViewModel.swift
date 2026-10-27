@@ -73,12 +73,12 @@ extension PhotoViewModel {
 
         state = .loading("Save image to Photo Library")
 
-        let task  = Task {
+        let task = Task {
             let image = filter.apply(to: selectedImage)
-            
+
             try await PhotoLibraryManager.shared.save(image: image)
         }
-        
+
         try await task.value
     }
 }
