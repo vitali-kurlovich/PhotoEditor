@@ -1,15 +1,13 @@
 # PhotoEditor
 
-An iOS/macOS photo-editing app for iOS that offers a curated collection of high-quality, cinematic filter presets using LUT (Look-Up Table) based color grading. The same professional technique used in film and photography for a rich, editorial aesthetic distinct from typical vintage/nostalgic filter apps.
+A SwiftUI photo editor for iOS and macOS built around **cinematic, LUT-based color grading**. Rather than another set of vintage or nostalgic presets, it applies the same `.cube` look-up tables colorists use in film and photography, giving photos a rich, editorial look. Everything is rendered on the GPU through Core Image and Metal.
 
-Implemented:
- - Loading and parsing  .cube LUT (Look-Up Table) files 
- - iOS/macOS UI
- - Image Processing using Core Image and Metal
+## Demo
 
 Frameworks:
  - SwiftUI, Core Image, Metal, PhotoKit, MCP, AVFoundation, CoreVideo
 
+## Features
 
 
 ### Hugging Face MCP
@@ -21,4 +19,5 @@ Frameworks:
 
 [![Watch the video](https://img.youtube.com/vi/yoC9tpgSfNg/0.jpg)](https://youtu.be/yoC9tpgSfNg)
 
+## Tech stack
 
