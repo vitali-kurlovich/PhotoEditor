@@ -6,25 +6,29 @@ import CoreImage
 import MCP
 import SwiftUI
 
-struct HuggingfacePromtView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    private var manager: MCPClientManager {
-        .shared
-    }
-
-    @State
-    private var runner = MCPToolRunner()
-
+extension HuggingfacePromtView {
     private nonisolated static var key: String {
         "HUGGINGFACE_API_KEY"
     }
 
-    @State
-    private var waitForResponse: Bool = false
+    private var manager: MCPClientManager {
+        .shared
+    }
+}
+
+struct HuggingfacePromtView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @AppKeychainStore(key: Self.key)
+    var bearerToken: String
 
     private var serverURL: String = "https://huggingface.co/mcp"
-    @State private var bearerToken: String = ProcessInfo.processInfo.environment[Self.key] ?? ""
+
+    @State
+    private var runner = MCPToolRunner()
+
+    @State
+    private var waitForResponse: Bool = false
 
     var onImage: (CIImage) -> Void = { _ in }
     @State
