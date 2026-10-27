@@ -10,7 +10,8 @@ struct PhotoView: View {
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var showMCPServer: Bool = false
-    @State private var showFileExport: Bool = false
+   
+    @State private var showVideoPreview: Bool = false
 
     @State private var viewMode: ViewMode = .divided
 
@@ -79,7 +80,9 @@ struct PhotoView: View {
                 Button("Generate Video", systemImage: "movieclapper") {
                     Task {
                         do {
-                            let url = try await model.generateVideo()
+                            let _ = try await model.generateVideo()
+
+                            showVideoPreview = true
                         } catch {}
                     }
 
@@ -117,8 +120,12 @@ struct PhotoView: View {
             selection: $model.selectedItem,
             matching: .images
         )
+        .sheet(isPresented: $showVideoPreview) {
+            if let url = model.videoURL {
+                VideoPreview(url: url)
+            }
+        }
         .ignoresSafeArea()
-        
     }
 
     var modePlacement: ToolbarItemPlacement {
