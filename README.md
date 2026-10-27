@@ -8,10 +8,17 @@ Implemented:
  - Image Processing using Core Image and Metal
 
 Frameworks:
- - SwiftUI, Core Image, Metal, PhotoKit
+ - SwiftUI, Core Image, Metal, PhotoKit, MCP, AVFoundation, CoreVideo
 
 
-[![Watch the video](https://img.youtube.com/vi/mhlkwJTqYLM/0.jpg)](https://youtu.be/mhlkwJTqYLM)
+
+### Hugging Face MCP
+
+[![Watch the video](https://img.youtube.com/vi/UkreDKHta_4/0.jpg)](https://youtu.be/UkreDKHta_4)
 
 
-[![Watch the video](https://img.youtube.com/vi/JHe07xnMoDo/0.jpg)](https://youtu.be/JHe07xnMoDo)
+### LUT
+
+[![Watch the video](https://img.youtube.com/vi/yoC9tpgSfNg/0.jpg)](https://youtu.be/yoC9tpgSfNg)
+
+
