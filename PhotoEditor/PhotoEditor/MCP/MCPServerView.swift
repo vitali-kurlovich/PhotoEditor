@@ -14,9 +14,10 @@ struct MCPServerView: View {
     /// Called when the user picks an image returned by a tool.
     var onImage: (CIImage) -> Void = { _ in }
 
-    private var serverURL: String = "https://huggingface.co/mcp"
+    private let serverURL: String = "https://huggingface.co/mcp"
 
-    @State private var bearerToken: String = ProcessInfo.processInfo.environment[Self.key] ?? ""
+    @AppKeychainStore(key: Self.key)
+    private var bearerToken: String
 
     @Environment(\.dismiss) private var dismiss
 
@@ -27,18 +28,16 @@ struct MCPServerView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Server") {
-                    Text(serverURL)
-                        .textContentType(.URL)
-                        .autocorrectionDisabled()
-                        .disabled(true)
-                    #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                    #endif
-
+                Section {
                     SecureField("Bearer token (optional)", text: $bearerToken)
-
+                } header: {
+                    HStack {
+                        Text("Hugging Face")
+                        Spacer()
+                        Link("https://huggingface.co", destination: URL(string: "https://huggingface.co/settings/tokens")!)
+                    }
+                }
+                Section {
                     statusRow
 
                     if manager.isConnected {

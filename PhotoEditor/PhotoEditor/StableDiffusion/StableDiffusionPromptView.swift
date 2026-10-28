@@ -78,8 +78,7 @@ struct StableDiffusionPromptView: View {
                 }
             }
             .controlSize(.small)
-            .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { _ in errorMessage = nil })) {
-            } message: {
+            .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { _ in errorMessage = nil })) {} message: {
                 Text(errorMessage ?? "")
             }
             .onDisappear {
@@ -88,7 +87,6 @@ struct StableDiffusionPromptView: View {
         }
     }
 
-    @ViewBuilder
     private var modelSection: some View {
         Section {
             switch store.state {

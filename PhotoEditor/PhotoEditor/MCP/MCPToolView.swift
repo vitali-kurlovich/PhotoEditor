@@ -72,6 +72,18 @@ struct MCPToolView: View {
     var body: some View {
         Form {
             Section {
+                Text(tool.name)
+                    .contextMenu {
+                        Button("Copy", systemImage: "doc.on.doc") {
+                            #if os(iOS)
+                                UIPasteboard.general.string = String(tool.name)
+                            #else
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(String(tool.name), forType: .string)
+                            #endif
+                        }
+                    }
+
                 if let description = tool.description {
                     Text(description)
                 }
@@ -133,6 +145,7 @@ struct MCPToolView: View {
                 }
             }
         }.controlSize(.small)
+        .textSelection(.enabled)
     }
 
     private func run() {

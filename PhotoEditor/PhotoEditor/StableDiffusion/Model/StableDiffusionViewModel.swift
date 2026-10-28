@@ -26,7 +26,9 @@ final class StableDiffusionViewModel {
     }
 
     var image: CGImage? {
-        if case let .finished(image, _) = state { return image }
+        if case let .finished(image, _) = state {
+            return image
+        }
         return nil
     }
 }

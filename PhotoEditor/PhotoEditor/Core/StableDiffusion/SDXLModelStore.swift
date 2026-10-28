@@ -50,12 +50,16 @@ final class SDXLModelStore {
 
 extension SDXLModelStore {
     var isReady: Bool {
-        if case .ready = state { return true }
+        if case .ready = state {
+            return true
+        }
         return false
     }
 
     var isDownloading: Bool {
-        if case .downloading = state { return true }
+        if case .downloading = state {
+            return true
+        }
         return false
     }
 
@@ -163,7 +167,7 @@ private extension SDXLModelStore {
 }
 
 /// Attaches each download task's progress to the overall model progress.
-private nonisolated final class ChildProgressDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+private final nonisolated class ChildProgressDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
     let parent: Progress
     let pendingUnitCount: Int64
 
