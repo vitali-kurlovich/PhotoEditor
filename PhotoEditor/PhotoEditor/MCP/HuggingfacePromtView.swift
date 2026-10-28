@@ -55,6 +55,7 @@ struct HuggingfacePromtView: View {
                 }
                 Section("Prompt") {
                     TextEditor(text: $promt)
+                        .frame(minHeight: 80)
                         .scrollContentBackground(.hidden)
                         .focused($isPromptFocused)
                 }
