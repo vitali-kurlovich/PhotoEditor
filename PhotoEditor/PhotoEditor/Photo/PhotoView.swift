@@ -11,6 +11,7 @@ struct PhotoView: View {
     @State private var showPhotosPicker: Bool = false
     @State private var showMCPServer: Bool = false
     @State private var showStableDiffusion: Bool = false
+    @State private var showFlux: Bool = false
 
     @State private var showVideoPreview: Bool = false
 
@@ -110,6 +111,10 @@ struct PhotoView: View {
                 Button("Stable Diffusion", systemImage: "wand.and.sparkles") {
                     showStableDiffusion.toggle()
                 }
+
+                Button("FLUX", systemImage: "sparkles") {
+                    showFlux.toggle()
+                }
             }
         }
         .sheet(isPresented: $showMCPServer) {
@@ -122,6 +127,14 @@ struct PhotoView: View {
         }
         .sheet(isPresented: $showStableDiffusion) {
             StableDiffusionPromptView(
+                onImage: { image in
+                    MetalContextManager.shared.clearCaches()
+                    model.selectedImage = image
+                }
+            )
+        }
+        .sheet(isPresented: $showFlux) {
+            FluxPromptView(
                 onImage: { image in
                     MetalContextManager.shared.clearCaches()
                     model.selectedImage = image

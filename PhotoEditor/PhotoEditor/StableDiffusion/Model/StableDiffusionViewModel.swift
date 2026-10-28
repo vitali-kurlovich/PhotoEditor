@@ -49,9 +49,9 @@ extension StableDiffusionViewModel {
         generationTask = Task {
             defer { generationTask = nil }
             do {
-                let image = try await generator.generate(request, resourcesAt: url) { [weak self] step, stepCount in
+                let image = try await generator.generate(request, resourcesAt: url) { step, stepCount in
                     Task { @MainActor in
-                        guard let self, self.isGenerating else { return }
+                        guard self.isGenerating else { return }
                         self.state = .generating(step: step, stepCount: stepCount)
                     }
                 }
