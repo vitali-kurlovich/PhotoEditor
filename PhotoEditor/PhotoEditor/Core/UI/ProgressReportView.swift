@@ -8,7 +8,7 @@ struct ProgressReportView: View {
     @State private var observation: ProgressObservation?
 
     init(_ progress: Progress) {
-        observation = ProgressObservation(progress: progress)
+        _observation = State(initialValue: ProgressObservation(progress: progress))
     }
 
     var body: some View {

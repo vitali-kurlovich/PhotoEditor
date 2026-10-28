@@ -55,6 +55,7 @@ struct HuggingfacePromtView: View {
                 }
                 Section("Prompt") {
                     TextEditor(text: $promt)
+                        .frame(minHeight: 80)
                         .scrollContentBackground(.hidden)
                         .focused($isPromptFocused)
                 }
@@ -82,7 +83,8 @@ struct HuggingfacePromtView: View {
                                     await manager.connect(to: serverURL, bearerToken: bearerToken)
                                 }
 
-                                self.runner.tool = manager.tools.last
+                                self.runner.tool = manager.tools
+                                    .first(where: { $0.name == "gr4_flux_3_image_klein_infer" })
 
                                 await runner
                                     .run(

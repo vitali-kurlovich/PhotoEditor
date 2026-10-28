@@ -10,6 +10,7 @@ struct PhotoView: View {
     @State private var showFilterPicker: Bool = false
     @State private var showPhotosPicker: Bool = false
     @State private var showMCPServer: Bool = false
+    @State private var showStableDiffusion: Bool = false
 
     @State private var showVideoPreview: Bool = false
 
@@ -40,11 +41,11 @@ struct PhotoView: View {
             #if os(iOS) || os(tvOS)
             .sheet(isPresented: $showFilterPicker) {
                 FilterPickerLoader(
-                    thumbnail: selectedImage,
+                    thumbnail: model.selectedImage,
                     selectedFilter: .init(get: {
-                        filter
+                        model.filter
                     }, set: { new in
-                        filter = new ?? .none
+                        model.filter = new ?? .none
                     })
                 )
             }
@@ -105,10 +106,22 @@ struct PhotoView: View {
                 Button("MCP", systemImage: "point.3.connected.trianglepath.dotted") {
                     showMCPServer.toggle()
                 }
+
+                Button("Stable Diffusion", systemImage: "wand.and.sparkles") {
+                    showStableDiffusion.toggle()
+                }
             }
         }
         .sheet(isPresented: $showMCPServer) {
             HuggingfacePromtView(
+                onImage: { image in
+                    MetalContextManager.shared.clearCaches()
+                    model.selectedImage = image
+                }
+            )
+        }
+        .sheet(isPresented: $showStableDiffusion) {
+            StableDiffusionPromptView(
                 onImage: { image in
                     MetalContextManager.shared.clearCaches()
                     model.selectedImage = image
